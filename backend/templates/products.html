@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #333; }
+
+        nav {
+            background: #1a1a2e; color: white; padding: 15px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        nav a { color: #e94560; text-decoration: none; font-weight: bold; font-size: 20px; }
+        nav .nav-links a { color: white; text-decoration: none; margin-left: 20px; font-size: 14px; }
+        nav .nav-links a:hover { color: #e94560; }
+
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+
+        .flash { padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
+        .flash.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .flash.danger  { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .page-header h1 { font-size: 28px; color: #1a1a2e; }
+
+        .filters {
+            background: white; padding: 20px; border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 30px;
+            display: flex; gap: 15px; flex-wrap: wrap; align-items: center;
+        }
+        .filters input, .filters select {
+            padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px;
+            font-size: 14px; flex: 1; min-width: 180px;
+        }
+        .filters button {
+            background: #e94560; color: white; border: none;
+            padding: 10px 25px; border-radius: 8px; cursor: pointer; font-size: 14px;
+        }
+        .filters button:hover { background: #c73652; }
+
+        .products-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px;
+        }
+        .product-card {
+            background: white; border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+
+        .card-img {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            height: 180px; display: flex; align-items: center; justify-content: center;
+        }
+        .card-img span { font-size: 60px; }
+
+        .card-body { padding: 20px; }
+        .card-category {
+            font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+            color: #e94560; font-weight: 600; margin-bottom: 8px;
+        }
+        .card-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: #1a1a2e; }
+        .card-desc { font-size: 13px; color: #666; margin-bottom: 15px; line-height: 1.5; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; }
+        .card-price { font-size: 20px; font-weight: 700; color: #e94560; }
+        .card-stock { font-size: 12px; color: #28a745; }
+        .card-stock.out { color: #dc3545; }
+        .btn-view {
+            display: block; text-align: center; margin-top: 15px;
+            background: #1a1a2e; color: white; text-decoration: none;
+            padding: 10px; border-radius: 8px; font-size: 14px; transition: background 0.2s;
+        }
+        .btn-view:hover { background: #e94560; }
+
+        .empty { text-align: center; padding: 60px; color: #999; font-size: 18px; }
+    </style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+</head>
+<body>
+<nav>
+    <a href="/">🛒 SecureShop</a>
+    <div class="nav-links">
+        <a href="/products">Products</a>
+        {% if current_user.is_authenticated %}
+            {% if current_user.role == 'admin' %}
+                <a href="/admin/products">Manage Products</a>
+                <a href="/dashboard">Dashboard</a>
+            {% endif %}
+            <a href="/logout">Logout ({{ current_user.name }})</a>
+        {% else %}
+            <a href="/login">Login</a>
+            <a href="/register">Register</a>
+        {% endif %}
+    </div>
+</nav>
+
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <div class="page-header">
+        <h1>All Products</h1>
+        <span style="color:#666">{{ products|length }} item(s) found</span>
+    </div>
+
+    <form class="filters" method="GET">
+        <input type="text" name="search" placeholder="🔍 Search products..." value="{{ search }}">
+        <select name="category">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+                <option value="{{ cat }}" {% if cat == selected_category %}selected{% endif %}>{{ cat }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Search</button>
+        <a href="/products" style="color:#666; font-size:14px; text-decoration:none;">Clear</a>
+    </form>
+
+    {% if products %}
+    <div class="products-grid">
+        {% for p in products %}
+        <div class="product-card">
+            <div class="card-img">
+                {% if p[6] %}
+                    <img src="{{ url_for('static', filename=p[6]) }}" alt="{{ p[1] }}" style="width:100%;height:100%;object-fit:cover;border-radius:0;">
+                {% else %}
+                    <span>📦</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="card-category">{{ p[5] or 'General' }}</div>
+                <div class="card-title">{{ p[1] }}</div>
+                <div class="card-desc">{{ (p[2] or 'No description')[:80] }}{% if p[2] and p[2]|length > 80 %}...{% endif %}</div>
+                <div class="card-footer">
+                    <span class="card-price">${{ "%.2f"|format(p[3]) }}</span>
+                    <span class="card-stock {% if p[4] == 0 %}out{% endif %}">
+                        {% if p[4] > 0 %}✓ {{ p[4] }} in stock{% else %}✗ Out of stock{% endif %}
+                    </span>
+                </div>
+                <a href="/products/{{ p[0] }}" class="btn-view">View Details →</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+        <div class="empty">😕 No products found.</div>
+    {% endif %}
+</div>
+</body>
+</html>

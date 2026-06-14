@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ product[1] }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; }
+        nav {
+            background: #1a1a2e; color: white; padding: 15px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        nav a { color: #e94560; text-decoration: none; font-weight: bold; font-size: 20px; }
+        nav .nav-links a { color: white; text-decoration: none; margin-left: 20px; font-size: 14px; }
+        nav .nav-links a:hover { color: #e94560; }
+        .container { max-width: 900px; margin: 50px auto; padding: 0 20px; }
+        .card {
+            background: white; border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden;
+            display: grid; grid-template-columns: 1fr 1fr;
+        }
+        .card-img {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            display: flex; align-items: center; justify-content: center; min-height: 350px;
+        }
+        .card-img span { font-size: 100px; }
+        .card-body { padding: 40px; }
+        .category { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #e94560; font-weight: 600; }
+        h1 { font-size: 28px; color: #1a1a2e; margin: 10px 0 15px; }
+        .price { font-size: 32px; font-weight: 700; color: #e94560; margin-bottom: 20px; }
+        .desc { color: #555; line-height: 1.7; margin-bottom: 25px; font-size: 15px; }
+        .stock { font-size: 14px; margin-bottom: 30px; }
+        .stock.in { color: #28a745; } .stock.out { color: #dc3545; }
+        .add-btn {
+            display: inline-block; background: #e94560; color: white;
+            padding: 12px 25px; border-radius: 8px; border: none;
+            cursor: pointer; font-size: 14px; margin-bottom: 10px; width: 100%;
+        }
+        .add-btn:hover { background: #c73652; }
+        .back-btn {
+            display: inline-block; background: #1a1a2e; color: white;
+            padding: 12px 25px; border-radius: 8px; text-decoration: none; font-size: 14px; width: 100%;
+            text-align: center;
+        }
+        .back-btn:hover { background: #e94560; }
+        .flash { background: #d4edda; padding: 10px; border-radius: 6px; margin-bottom: 15px; color: #155724; }
+    </style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+</head>
+<body>
+<nav>
+    <a href="/">🛒 SecureShop</a>
+    <div class="nav-links">
+        <a href="/products">← Back to Products</a>
+        {% if current_user.is_authenticated %}
+            <a href="/cart">🛒 Cart</a>
+            <a href="/logout">Logout</a>
+        {% else %}
+            <a href="/login">Login</a>
+        {% endif %}
+    </div>
+</nav>
+<div class="container">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for msg in messages %}
+                <div class="flash">{{ msg }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="card">
+        <div class="card-img">
+            {% if product[6] %}
+                <img src="{{ url_for('static', filename=product[6]) }}" alt="{{ product[1] }}" style="width:100%;height:100%;object-fit:cover;border-radius:0;">
+            {% else %}
+                <span>📦</span>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <div class="category">{{ product[5] or 'General' }}</div>
+            <h1>{{ product[1] }}</h1>
+            <div class="price">${{ "%.2f"|format(product[3]) }}</div>
+            <div class="desc">{{ product[2] or 'No description available.' }}</div>
+            <div class="stock {% if product[4] > 0 %}in{% else %}out{% endif %}">
+                {% if product[4] > 0 %}✓ {{ product[4] }} in stock{% else %}✗ Out of stock{% endif %}
+            </div>
+            {% if current_user.is_authenticated and product[4] > 0 %}
+            <form action="{{ url_for('cart.add_to_cart', product_id=product[0]) }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="add-btn">🛒 Add to Cart</button>
+            </form>
+            {% endif %}
+            <a href="/products" class="back-btn">← Back to Products</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

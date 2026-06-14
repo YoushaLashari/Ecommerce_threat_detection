@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Failed</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; }
+        nav {
+            background: #1a1a2e; color: white; padding: 15px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        nav .brand { color: #e94560; text-decoration: none; font-weight: bold; font-size: 20px; }
+        nav .nav-links a { color: white; text-decoration: none; margin-left: 20px; font-size: 14px; }
+        nav .nav-links a:hover { color: #e94560; }
+
+        .container { max-width: 550px; margin: 80px auto; padding: 0 20px; }
+        .card {
+            background: white; border-radius: 12px; padding: 50px 40px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1); text-align: center;
+        }
+        .icon { font-size: 80px; margin-bottom: 20px; }
+        h2 { font-size: 28px; color: #e94560; margin-bottom: 10px; }
+        .sub { color: #888; font-size: 15px; margin-bottom: 8px; }
+        .amount { font-size: 22px; font-weight: 700; color: #1a1a2e; margin: 15px 0; }
+        .badge {
+            display: inline-block; padding: 6px 16px; border-radius: 20px;
+            font-size: 13px; font-weight: 600;
+            background: #fff3cd; color: #856404; margin-bottom: 30px;
+        }
+        .actions { display: flex; gap: 15px; justify-content: center; }
+        .btn-danger {
+            background: #e94560; color: white; text-decoration: none;
+            padding: 12px 25px; border-radius: 8px; font-size: 14px; font-weight: 600;
+        }
+        .btn-danger:hover { background: #c73652; }
+        .btn-outline {
+            background: white; color: #1a1a2e; text-decoration: none;
+            padding: 12px 25px; border-radius: 8px; font-size: 14px;
+            font-weight: 600; border: 2px solid #1a1a2e;
+        }
+        .btn-outline:hover { background: #1a1a2e; color: white; }
+    </style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+</head>
+<body>
+<nav>
+    <a href="/" class="brand">🛒 SecureShop</a>
+    <div class="nav-links">
+        <a href="/products">Products</a>
+        <a href="/my-orders">My Orders</a>
+        <a href="/logout">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="card">
+        <div class="icon">❌</div>
+        <h2>Payment Failed!</h2>
+        <p class="sub">Something went wrong with your payment for Order #{{ order[0] }}.</p>
+        <div class="amount">${{ "%.2f"|format(order[1]) }}</div>
+        <span class="badge">⚠ Pending</span>
+        <div class="actions">
+            <a href="{{ url_for('payments.payment', order_id=order[0]) }}" class="btn-danger">🔄 Try Again</a>
+            <a href="/my-orders" class="btn-outline">📦 My Orders</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

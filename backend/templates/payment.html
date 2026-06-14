@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+</head>
+<body style="background:#f0f2f5;">
+<nav class="navbar navbar-dark" style="background:#1a1a2e;">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/">🛒 SecureShop</a>
+        <div>
+            <a href="/products" class="text-white me-3 text-decoration-none">Products</a>
+            <a href="/my-orders" class="text-white me-3 text-decoration-none">My Orders</a>
+            <a href="/logout" class="text-white text-decoration-none">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white text-center">
+                    <h4>💳 Payment for Order #{{ order[0] }}</h4>
+                    <p class="mb-0">Total: <strong>${{ "%.2f"|format(order[1]) }}</strong></p>
+                </div>
+                <div class="card-body">
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Card Number</label>
+                            <input type="text" name="card_number" class="form-control"
+                                   placeholder="1234 5678 9012 3456" maxlength="16" required>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label class="form-label fw-bold">Expiry Date</label>
+                                <input type="text" name="expiry" class="form-control"
+                                       placeholder="MM/YY" maxlength="5" required>
+                            </div>
+                            <div class="col">
+                                <label class="form-label fw-bold">CVV</label>
+                                <input type="password" name="cvv" class="form-control"
+                                       placeholder="123" maxlength="3" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Cardholder Name</label>
+                            <input type="text" name="card_name" class="form-control"
+                                   placeholder="Your Name" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                💳 Pay ${{ "%.2f"|format(order[1]) }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <a href="/my-orders" class="text-muted">← Back to My Orders</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
